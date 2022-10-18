@@ -76,6 +76,8 @@ func getReferral(err error, packet *ber.Packet) (referral string, e error) {
 		return "", nil
 	}
 
+	fmt.Printf("referral packet: %+v\n", packet)
+
 	if len(packet.Children) < 2 {
 		return "", fmt.Errorf("ldap: returned error indicates the packet contains a referral but it doesn't have sufficient child nodes: %w", err)
 	}
