@@ -1,6 +1,7 @@
 package ldap
 
 import (
+	"bytes"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -77,11 +78,15 @@ func getReferral(err error, packet *ber.Packet) (referral string, e error) {
 		return "", nil
 	}
 
-	var data []byte
+	buf := &bytes.Buffer{}
 
-	base64.StdEncoding.Encode(data, packet.Bytes())
+	encoder := base64.NewEncoder(base64.StdEncoding, buf)
 
-	fmt.Printf("referral packet data: %s\n", data)
+	_, _ = encoder.Write(packet.Bytes())
+
+	_ = encoder.Close()
+
+	fmt.Printf("referral packet data: %s\n", buf.Bytes())
 
 	if len(packet.Children) < 2 {
 		return "", fmt.Errorf("ldap: returned error indicates the packet contains a referral but it doesn't have sufficient child nodes: %w", err)
