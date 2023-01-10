@@ -135,8 +135,6 @@ func (l *Conn) Modify(modifyRequest *ModifyRequest) error {
 type ModifyResult struct {
 	// Controls are the returned controls
 	Controls []Control
-	// Referral is the returned referral
-	Referral string
 }
 
 // ModifyWithResult performs the ModifyRequest and returns the result
@@ -159,14 +157,9 @@ func (l *Conn) ModifyWithResult(modifyRequest *ModifyRequest) (*ModifyResult, er
 
 	switch packet.Children[1].Tag {
 	case ApplicationModifyResponse:
-		if err = GetLDAPError(packet); err != nil {
-			if referral, referralErr := getReferral(err, packet); referralErr != nil {
-				return result, referralErr
-			} else {
-				result.Referral = referral
-			}
-
-			return result, err
+		err := GetLDAPError(packet)
+		if err != nil {
+			return nil, err
 		}
 		if len(packet.Children) == 3 {
 			for _, child := range packet.Children[2].Children {
